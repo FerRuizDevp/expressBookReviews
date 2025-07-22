@@ -8,7 +8,17 @@ const app = express();
 
 app.use(express.json());
 
-app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUninitialized: true}))
+let users = [];
+
+const doesExist = (username) => {
+  return users.some(user => user.username === username);
+};
+
+app.use("/customer", session({
+  secret: "fingerprint_customer",
+  resave: true,
+  saveUninitialized: true
+}));
 
 // ✅ Session-based JWT Auth Middleware:
 app.use("/customer/auth/*", function auth(req, res, next) {
