@@ -43,7 +43,7 @@ app.post("/login", (req, res) => {
     const password = req.body.password;
 
     if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required" });
+        return res.status(400).json({ message: "Username and password are required!" });
     }
 
     if (authenticatedUser(username, password)) {

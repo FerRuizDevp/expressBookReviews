@@ -23,7 +23,7 @@ const doesExist = (username) => {
   
     users.push({ username, password });
     console.log("Users now:", users);
-    return res.status(201).json({ message: "User registered successfully" });
+    return res.status(201).json({ message: "User registered successfully!" });
   });
 
 // Get the book list available in the shop
