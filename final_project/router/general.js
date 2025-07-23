@@ -1,14 +1,15 @@
 const express = require('express');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
-let users = require("./auth_users.js").users;
+let users = require('./users');
 const public_users = express.Router();
 
 const doesExist = (username) => {
     return users.some((user) => user.username === username);
   };  
-
-  // Register new user
+  
+  //TASK 6
+  // Register new user route
   public_users.post("/register", (req, res) => {
     const { username, password } = req.body;
     console.log("Register request received:", username, password);
@@ -26,11 +27,13 @@ const doesExist = (username) => {
     return res.status(201).json({ message: "User registered successfully!" });
   });
 
+//TASK 1
 // Get the book list available in the shop
 public_users.get('/', function (req, res) {
     res.send(JSON.stringify(books, null, 4));  // pretty print all books
   });
 
+//TASK 2
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
     const isbn = req.params.isbn;
@@ -42,7 +45,8 @@ public_users.get('/isbn/:isbn', function (req, res) {
       res.status(404).json({ message: "Book not found" });
     }
   });
-  
+
+//TASK 3
 // Get book details based on author
 public_users.get('/author/:author', function (req, res) {
     const author = req.params.author;
@@ -61,6 +65,7 @@ public_users.get('/author/:author', function (req, res) {
     }
   });
 
+//TASK 4
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
     const title = req.params.title;
@@ -79,6 +84,7 @@ public_users.get('/title/:title', function (req, res) {
     }
   });
 
+//TASK 5
 //  Get book review
 public_users.get('/review/:isbn', function (req, res) {
     const isbn = req.params.isbn;

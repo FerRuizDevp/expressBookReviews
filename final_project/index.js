@@ -1,11 +1,9 @@
 const express = require('express');
-const jwt = require('jsonwebtoken');
-const session = require('express-session')
+const session = require('express-session');
 const customer_routes = require('./router/auth_users.js').authenticated;
 const genl_routes = require('./router/general.js').general;
 
 const app = express();
-
 app.use(express.json());
 
 let users = [];
@@ -14,7 +12,7 @@ const doesExist = (username) => {
   return users.some(user => user.username === username);
 };
 
-app.use("/customer", session({
+app.use(session({
   secret: "fingerprint_customer",
   resave: true,
   saveUninitialized: true
@@ -38,21 +36,29 @@ app.use("/customer/auth/*", function auth(req, res, next) {
 });
 
 // ✅ Login Endpoint:
+const jwt = require("jsonwebtoken");
+
+const authenticatedUser = (username, password) => {
+  const user = users.find((user) => user.username === username && user.password === password);
+  return !!user;
+};
+
 app.post("/login", (req, res) => {
-    const username = req.body.username;
-    const password = req.body.password;
+  const { username, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).json({ message: "Username and password are required!" });
-    }
+  if (!username || !password) {
+    return res.status(404).json({ message: "Error logging in" });
+  }
 
-    if (authenticatedUser(username, password)) {
-        let accessToken = jwt.sign({ username: username }, 'access', { expiresIn: 60 * 60 });
-        req.session.authorization = { accessToken, username };
-        return res.status(200).send("User successfully logged in");
-    } else {
-        return res.status(401).json({ message: "Invalid Login. Check username and password" });
-    }
+  if (authenticatedUser(username, password)) {
+    let accessToken = jwt.sign({ data: password }, "access", { expiresIn: 60 * 60 });
+
+    // ✅ req.session must be defined here
+    req.session.authorization = { accessToken, username };
+    return res.status(200).json({ message: "User successfully logged in", token: accessToken });
+  } else {
+    return res.status(208).json({ message: "Invalid Login. Check username and password" });
+  }
 });
 
 // ✅ Register Endpoint:
