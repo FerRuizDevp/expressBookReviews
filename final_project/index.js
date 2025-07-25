@@ -18,20 +18,22 @@ app.use(session({
   saveUninitialized: true
 }));
 
-// ✅ Session-based JWT Auth Middleware:
+// ✅ Token-Based Auth Middleware:
 app.use("/customer/auth/*", function auth(req, res, next) {
-    if (req.session.authorization) {
-        let token = req.session.authorization['accessToken'];
-        jwt.verify(token, "access", (err, user) => {
+    const authHeader = req.headers.authorization;
+
+    if (authHeader) {
+        const token = authHeader.split(' ')[1]; // Remove "Bearer "
+        jwt.verify(token, "access", (err, decoded) => {
             if (!err) {
-                req.user = user;
+                req.username = decoded.username || decoded.data; // fallback for old token structure
                 next();
             } else {
                 return res.status(403).json({ message: "User not authenticated" });
             }
         });
     } else {
-        return res.status(403).json({ message: "User not logged in" });
+        return res.status(401).json({ message: "User not logged in" });
     }
 });
 
@@ -51,7 +53,7 @@ app.post("/login", (req, res) => {
   }
 
   if (authenticatedUser(username, password)) {
-    let accessToken = jwt.sign({ data: password }, "access", { expiresIn: 60 * 60 });
+    let accessToken = jwt.sign({ username }, "access", { expiresIn: 60 * 60 });
 
     // ✅ req.session must be defined here
     req.session.authorization = { accessToken, username };

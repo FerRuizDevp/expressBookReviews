@@ -19,6 +19,8 @@ const authenticatedUser = (username, password) => {
 regd_users.post("/login", (req, res) => {
     const { username, password } = req.body;
   
+    console.log("Login Request:", req.body); // Debug log
+  
     if (!username || !password) {
       return res.status(400).json({ message: "Username and password are required" });
     }
@@ -37,16 +39,31 @@ regd_users.post("/login", (req, res) => {
     return res.status(200).json({ message: "Login successful!", token: accessToken });
   });
 
+  const authenticate = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+  
+    if (!authHeader) {
+      return res.status(401).json({ message: 'Authorization header missing' });
+    }
+  
+    const token = authHeader.split(' ')[1];
+  
+    jwt.verify(token, 'access', (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: 'Invalid or expired token' });
+      }
+  
+      req.username = decoded.username || decoded.data;
+      next();
+    });
+  };
+
 // TASK 8
 // Add a book review
-regd_users.put("/auth/review/:isbn", (req, res) => {
+regd_users.put("/auth/review/:isbn", authenticate, (req, res) => {
   const isbn = req.params.isbn;
-  const review = req.query.review;
-  const username = req.session.authorization?.username;
-
-  if (!username) {
-    return res.status(401).json({ message: "User not logged in" });
-  }
+  const review = req.body.review;
+  const username = req.username;
 
   if (!review) {
     return res.status(400).json({ message: "Review query is required" });
@@ -66,13 +83,9 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
 
 // TASK 9
 // Delete a book review
-regd_users.delete("/auth/review/:isbn", (req, res) => {
+regd_users.delete("/auth/review/:isbn", authenticate, (req, res) => {
     const isbn = req.params.isbn;
-    const username = req.session.authorization?.username;
-  
-    if (!username) {
-      return res.status(401).json({ message: "User not logged in" });
-    }
+    const username = req.username;
   
     let book = books[isbn];
   
