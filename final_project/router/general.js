@@ -2,6 +2,7 @@ const express = require('express');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require('./users');
+const axios = require('axios');
 const public_users = express.Router();
 
 const doesExist = (username) => {
@@ -98,3 +99,52 @@ public_users.get('/review/:isbn', function (req, res) {
   });
 
 module.exports.general = public_users;
+
+// --------------------
+// Tasks 10–13
+// --------------------
+
+// Task 10: Get all books using Axios
+const getAllBooks = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/');
+      console.log("📚 All Books:\n", response.data);
+    } catch (error) {
+      console.error("❌ Error fetching all books:", error.message);
+    }
+  };
+  
+  // Task 11: Get book by ISBN
+  const getBookByISBN = async (isbn) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/isbn/${isbn}`);
+      console.log(`📘 Book with ISBN ${isbn}:\n`, response.data);
+    } catch (error) {
+      console.error(`❌ Error fetching book by ISBN ${isbn}:`, error.message);
+    }
+  };
+  
+  // Task 12: Get books by author
+  const getBooksByAuthor = async (author) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/author/${author}`);
+      console.log(`🖋️ Books by ${author}:\n`, response.data);
+    } catch (error) {
+      console.error(`❌ Error fetching books by author ${author}:`, error.message);
+    }
+  };
+  
+  // Task 13: Get books by title
+  const getBooksByTitle = async (title) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/title/${title}`);
+      console.log(`📗 Books with title "${title}":\n`, response.data);
+    } catch (error) {
+      console.error(`❌ Error fetching books by title "${title}":`, error.message);
+    }
+  };
+    
+  getAllBooks();
+  getBookByISBN("1");
+  getBooksByAuthor("Chinua Achebe");
+  getBooksByTitle("Things Fall Apart");
